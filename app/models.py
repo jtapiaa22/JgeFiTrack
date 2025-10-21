@@ -1,6 +1,7 @@
 from app.extensions import db
 from flask_login import UserMixin
 from datetime import datetime
+import math
 
 
 # =========================================================
@@ -74,6 +75,7 @@ class MedicionCorporal(db.Model):
     imc = db.Column(db.Float)
     metabolismo_basal = db.Column(db.Float)
     grasa_corporal = db.Column(db.Float)
+    masa_grasa = db.Column(db.Float)
     agua_corporal = db.Column(db.Float)
     rcc = db.Column(db.Float)
     rca = db.Column(db.Float)
@@ -97,19 +99,42 @@ class MedicionCorporal(db.Model):
                 self.metabolismo_basal = round(10 * self.peso + 6.25 * self.altura - 5 * edad - 161, 2)
             else:
                 self.metabolismo_basal = round(10 * self.peso + 6.25 * self.altura - 5 * edad + 5, 2)
+                
 
     def calcular_grasa_corporal(self, genero="masculino", edad=25):
-        if self.imc and edad:
-            if genero.lower() == "femenino":
-                self.grasa_corporal = round(1.29579 * self.imc + 0.23 * edad - 5.4, 2)
-            else:
-                self.grasa_corporal = round(1.29579 * self.imc + 0.23 * edad - 16.2, 2)
-
-            if self.cintura and self.cadera:
-                ajuste = min((self.cintura / self.cadera) * 2, 3)
-                self.grasa_corporal = round(self.grasa_corporal + ajuste, 2)
-        else:
+        if not (self.cintura and self.cadera and self.altura):
             self.grasa_corporal = None
+            return
+
+        try:
+            # Convertir altura a cm si viene en metros (por seguridad)
+            altura = self.altura
+            if altura < 10:  # por si el usuario la ingresó en metros
+                altura *= 100
+
+            # ===== US NAVY (ajustada sin cuello) =====
+            if genero.lower() == "masculino":
+                # Fórmula adaptada para hombres (sin cuello)
+                bf = (86.010 * math.log10(self.cintura - self.cintura * 0.25)) \
+                    - (70.041 * math.log10(altura)) + 36.76
+            else:
+                # Fórmula adaptada para mujeres (sin cuello)
+                bf = (163.205 * math.log10(self.cintura + self.cadera - self.cintura * 0.2)) \
+                    - (97.684 * math.log10(altura)) - 78.387
+                
+            # Calcular masa grasa en kg
+            if self.grasa_corporal and self.peso:
+                self.masa_grasa = round(self.peso * (self.grasa_corporal / 100), 2)
+            else:
+                self.masa_grasa = None
+
+
+            # Limitar a rango fisiológico normal
+            self.grasa_corporal = round(max(2, min(bf, 60)), 2)
+
+        except (ValueError, ZeroDivisionError):
+            self.grasa_corporal = None
+
 
     def calcular_agua_corporal(self, genero="masculino", edad=25):
         if self.peso and self.altura:
@@ -128,16 +153,33 @@ class MedicionCorporal(db.Model):
             self.rca = round(self.cintura / self.altura, 2)
 
     def calcular_musculo(self):
-        if self.grasa_corporal is not None and self.agua_corporal is not None:
-            masa_magra = 100 - self.grasa_corporal
-            self.musculo = round(masa_magra * 0.8, 2)
-        elif self.grasa_corporal is not None:
-            self.musculo = round((100 - self.grasa_corporal) * 0.8, 2)
-        else:
+        """
+        Calcula el porcentaje de masa muscular estimada
+        en función del porcentaje de grasa corporal.
+        Basado en la proporción fisiológica promedio:
+        - Hombres: músculo ≈ 50 – 60% del peso magro
+        - Mujeres: músculo ≈ 45 – 55% del peso magro
+        """
+        if self.grasa_corporal is None:
             self.musculo = None
+            return
 
-        if self.musculo is not None:
-            self.musculo = max(0, min(self.musculo, 100))
+        # Calcular masa magra (100 - grasa)
+        masa_magra = 100 - self.grasa_corporal
+
+        # Ajuste por género
+        if hasattr(self, "alumno") and self.alumno and self.alumno.genero:
+            genero = self.alumno.genero.lower()
+        else:
+            genero = "masculino"
+
+        if genero == "femenino":
+            self.musculo = round(masa_magra * 0.50, 2)  # mujeres: ~50% masa magra
+        else:
+            self.musculo = round(masa_magra * 0.55, 2)  # hombres: ~55% masa magra
+
+        # Limitar rango 0–100
+        self.musculo = max(0, min(self.musculo, 100))
 
     def calcular_todo(self, genero="masculino", edad=25):
         self.calcular_imc()
