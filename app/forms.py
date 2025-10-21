@@ -26,7 +26,7 @@ class EditarClienteForm(FlaskForm):
 
 class MedicionForm(FlaskForm):
     alumno = SelectField('Alumno', coerce=int, validators=[DataRequired()])
-    fecha = DateField('Fecha', validators=[DataRequired()])
+    fecha = DateField('Fecha de Medicion', validators=[DataRequired()])
     peso = FloatField('Peso (kg)', validators=[DataRequired()])
     altura = FloatField('Altura (cm)', validators=[DataRequired()])
     grasa_corporal = FloatField('Grasa Corporal (%)')
