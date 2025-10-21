@@ -41,6 +41,9 @@ def create_app():
     # =========================================================
     with app.app_context():
         try:
+            # Crear tablas si no existen antes de buscar admin
+            db.create_all()
+
             admin_existente = User.query.filter_by(is_admin=True).first()
 
             if not admin_existente:
@@ -65,7 +68,6 @@ def create_app():
 
         except Exception as e:
             print(f"⚠️ No se pudo crear el usuario admin: {e}")
-
 
     # =========================================================
     # Context processors
