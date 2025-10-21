@@ -1,0 +1,13 @@
+# Entorno virtual
+venv/
+__pycache__/
+
+# Base de datos local
+*.db
+
+# Configuración privada
+.env
+
+# Archivos del sistema
+desktop.ini
+.DS_Store

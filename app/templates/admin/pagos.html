@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-primary fw-bold mb-0">Pagos de Clientes</h2>
+  </div>
+
+  {% if pagos %}
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive custom-scroll">
+        <table class="table table-striped table-hover align-middle text-center mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th>Cliente</th>
+              <th>Monto</th>
+              <th>Mes Correspondiente</th>
+              <th>Fecha de Pago</th>
+              <th>Vence</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pagos %}
+            {% set vencimiento = p.fecha_pago + timedelta(days=30) %}
+            {% set dias_restantes = (vencimiento - now()).days %}
+
+            <tr
+              {% if p.estado == 'Aprobado' %}
+                {% if dias_restantes <= 0 %}
+                  class="table-danger"
+                {% elif dias_restantes <= 5 %}
+                  class="table-warning"
+                {% else %}
+                  class="table-success-subtle"
+                {% endif %}
+              {% endif %}
+            >
+              <td>{{ p.cliente.nombre }}</td>
+              <td>${{ "%.2f"|format(p.monto) }}</td>
+              <td>{{ p.mes_correspondiente }}</td>
+              <td>{{ p.fecha_pago.strftime('%d/%m/%Y') }}</td>
+              <td>
+                {{ vencimiento.strftime('%d/%m/%Y') }}
+                {% if dias_restantes <= 0 %}
+                  <span class="badge bg-danger ms-1">Vencido</span>
+                {% elif dias_restantes <= 5 %}
+                  <span class="badge bg-warning text-dark ms-1">Por vencer</span>
+                {% else %}
+                  <span class="badge bg-success ms-1">Activo</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-{% if p.estado == 'Aprobado' %}success{% elif p.estado == 'Pendiente' %}warning{% else %}danger{% endif %}">
+                  {{ p.estado }}
+                </span>
+              </td>
+              <td class="text-center">
+                {% if p.estado != "Aprobado" %}
+                <form action="{{ url_for('admin.aprobar_pago', id=p.id) }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-success mb-1">
+                    <i class="bi bi-check-circle"></i> Aprobar
+                  </button>
+                </form>
+                {% else %}
+                <span class="text-success fw-semibold me-2">
+                  <i class="bi bi-check2-circle"></i> Aprobado
+                </span>
+                {% endif %}
+
+                <form action="{{ url_for('admin.eliminar_pago', id=p.id) }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este pago?');">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  {% else %}
+  <div class="alert alert-info text-center shadow-sm mt-4">
+    No hay pagos registrados aún.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

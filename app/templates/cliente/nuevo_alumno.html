@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">➕ Nuevo Alumno</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre del alumno</label>
+                    {{ form.nombre(class="form-control", placeholder="Ej: Juan Pérez") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Edad</label>
+                    {{ form.edad(class="form-control", placeholder="Ej: 25") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Género</label>
+                    {{ form.genero(class="form-select") }}
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="bi bi-person-plus"></i> Guardar Alumno
+                    </button>
+                    <a href="{{ url_for('cliente.listar_alumnos') }}" class="btn btn-secondary px-4 ms-2">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const nombreInput = document.querySelector('input[name="nombre"]');
+  if (!nombreInput) return;
+
+  nombreInput.addEventListener("input", () => {
+    // Convierte a Capitalizado (primera letra de cada palabra en mayúscula)
+    nombreInput.value = nombreInput.value
+      .toLowerCase()
+      .replace(/\b\w/g, (letra) => letra.toUpperCase());
+  });
+});
+</script>
+{% endblock %}

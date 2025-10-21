@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white text-center rounded-top">
+            <h3 class="mb-0">Editar Alumno</h3>
+        </div>
+
+        <div class="card-body p-4">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nombre completo</label>
+                    {{ form.nombre(class="form-control", placeholder="Ingrese el nombre del alumno") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Edad</label>
+                    {{ form.edad(class="form-control", placeholder="Ingrese la edad") }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Género</label>
+                    {{ form.genero(class="form-select") }}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('cliente.listar_alumnos') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left-circle"></i> Volver
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+window.addEventListener("load", () => {
+  const nombreInput = document.getElementById("nombre");
+  if (!nombreInput) return;
+
+  function capitalizarTexto(texto) {
+    return texto
+      .split(" ")
+      .map(palabra => 
+        palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()
+      )
+      .join(" ");
+  }
+
+  // Normaliza al cargar (por si el nombre guardado estaba mal)
+  nombreInput.value = capitalizarTexto(nombreInput.value);
+
+  // Capitaliza mientras escribe
+  nombreInput.addEventListener("input", () => {
+    const cursor = nombreInput.selectionStart;
+    nombreInput.value = capitalizarTexto(nombreInput.value);
+    nombreInput.setSelectionRange(cursor, cursor);
+  });
+});
+</script>
+{% endblock %}

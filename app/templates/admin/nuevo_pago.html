@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+  <h2 class="text-center text-primary fw-bold mb-4">
+    <i class="bi bi-cash-coin"></i> Registrar Pago de Cliente
+  </h2>
+
+  <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+      <form method="post" class="needs-validation" novalidate>
+        <!-- Selección del cliente -->
+        <div class="mb-3">
+          <label for="cliente_id" class="form-label fw-semibold">Seleccionar Cliente</label>
+          <select class="form-select" id="cliente_id" name="cliente_id" required>
+            <option value="">-- Seleccione un cliente --</option>
+            {% for c in clientes %}
+              <option value="{{ c.id }}">{{ c.nombre }} ({{ c.username }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Monto -->
+        <div class="mb-3">
+          <label for="monto" class="form-label fw-semibold">Monto del Pago (ARS)</label>
+          <input
+            type="number"
+            class="form-control"
+            id="monto"
+            name="monto"
+            step="0.01"
+            min="0"
+            placeholder="Ej: 5000.00"
+            required
+          >
+        </div>
+
+        <!-- Estado del pago -->
+        <div class="mb-3">
+          <label for="estado" class="form-label fw-semibold">Estado del Pago</label>
+          <select class="form-select" id="estado" name="estado" required>
+            <option value="">-- Seleccione el estado --</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aprobado">Aprobado</option>
+          </select>
+          <small class="text-muted">Podés dejarlo pendiente si aún no fue confirmado.</small>
+        </div>
+
+        <!-- Fecha y Mes -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Mes Correspondiente</label>
+          <input
+            type="text"
+            class="form-control bg-light"
+            value="{{ now.strftime('%B %Y') }}"
+            disabled
+          >
+          <small class="text-muted">Se asigna automáticamente al mes actual.</small>
+        </div>
+
+        <!-- Botones -->
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-success px-4">
+            <i class="bi bi-check-circle"></i> Registrar Pago
+          </button>
+          <a href="{{ url_for('admin.pagos') }}" class="btn btn-secondary ms-2">
+            <i class="bi bi-arrow-left-circle"></i> Volver
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

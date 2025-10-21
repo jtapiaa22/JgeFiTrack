@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h3 class="text-center text-primary mb-4"><i class="bi bi-person-circle"></i> Iniciar Sesión</h3>
+        <form method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control", placeholder="Usuario") }}
+          </div>
+          <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control", placeholder="Contraseña") }}
+          </div>
+
+          <div class="d-grid">
+            {{ form.submit(class="btn btn-primary btn-block") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

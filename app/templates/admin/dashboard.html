@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+  <!-- ====== TÍTULO ====== -->
+  <div class="text-center mb-5">
+    <h2 class="text-primary fw-bold">
+      <i class="bi bi-speedometer2 me-2"></i> Panel de Administrador: {{ current_user.nombre }}
+    </h2>
+    <p class="text-muted">Resumen general del sistema y actividad reciente</p>
+  </div>
+
+  <!-- ====== TARJETAS DE RESUMEN ====== -->
+  <div class="row g-4 text-center">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 h-100 resumen-box hover-glow">
+        <div class="card-body">
+          <i class="bi bi-people fs-1 text-primary"></i>
+          <h5 class="card-title mt-3 text-secondary fw-semibold">Clientes Registrados</h5>
+          <p class="display-6 fw-bold text-dark mb-0">{{ total_clientes }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 h-100 resumen-box hover-glow">
+        <div class="card-body">
+          <i class="bi bi-person-badge fs-1 text-success"></i>
+          <h5 class="card-title mt-3 text-secondary fw-semibold">Total de Alumnos</h5>
+          <p class="display-6 fw-bold text-dark mb-0">{{ total_alumnos }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 h-100 resumen-box hover-glow">
+        <div class="card-body">
+          <i class="bi bi-clipboard-data fs-1 text-danger"></i>
+          <h5 class="card-title mt-3 text-secondary fw-semibold">Mediciones Registradas</h5>
+          <p class="display-6 fw-bold text-dark mb-0">{{ total_mediciones }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== GRÁFICO DE ACTIVIDAD ====== -->
+  <div class="mt-5">
+    <h4 class="text-secondary text-center mb-3">
+      <i class="bi bi-bar-chart-line"></i> Actividad Reciente
+    </h4>
+    <div class="card shadow-sm border-0 p-4 bg-light-subtle" id="grafico-contenedor">
+      <canvas id="graficoDashboard" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- ====== CLIENTES RECIENTES ====== -->
+  <div class="mt-5">
+    <h4 class="text-secondary text-center mb-3">
+      <i class="bi bi-person-lines-fill"></i> Últimos Clientes Agregados
+    </h4>
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 text-center">
+          <thead class="table-primary">
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha de Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cliente in clientes_recientes %}
+            <tr>
+              <td class="fw-semibold text-capitalize">{{ cliente.nombre }}</td>
+              <td>
+                {% if cliente.fecha_registro %}
+                {{ cliente.fecha_registro.strftime('%d/%m/%Y') }}
+                {% else %}
+                <span class="text-muted">Sin fecha</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <a href="{{ url_for('admin.editar_cliente', cliente_id=cliente.id) }}"
+                     class="btn btn-sm btn-outline-primary"
+                     title="Editar Cliente" data-bs-toggle="tooltip">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                  <form action="{{ url_for('admin.eliminar_cliente', cliente_id=cliente.id) }}"
+                        method="post" class="d-inline"
+                        onsubmit="return confirm('¿Seguro que deseas eliminar este cliente?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                            title="Eliminar Cliente" data-bs-toggle="tooltip">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-muted py-3">
+                <i class="bi bi-info-circle"></i> No hay clientes registrados recientemente.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCRIPT CHART.JS ====== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('graficoDashboard');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ grafico_labels|tojson }},
+      datasets: [{
+        label: 'Nuevos Clientes',
+        data: {{ grafico_datos|tojson }},
+        backgroundColor: [
+          'rgba(31, 78, 121, 0.7)',
+          'rgba(245, 184, 65, 0.7)',
+          'rgba(77, 181, 255, 0.7)'
+        ],
+        borderColor: [
+          'rgba(31, 78, 121, 1)',
+          'rgba(245, 184, 65, 1)',
+          'rgba(77, 181, 255, 1)'
+        ],
+        borderWidth: 2,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Nuevos Clientes por Mes',
+          color: '#4db5ff',
+          font: { size: 16, weight: 'bold' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#777', font: { weight: '500' } },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        },
+        y: {
+          ticks: { color: '#777' },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        }
+      }
+    }
+  });
+}
+
+// Bootstrap tooltips
+document.addEventListener("DOMContentLoaded", () => {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+});
+</script>
+
+{% endblock %}

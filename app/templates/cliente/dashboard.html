@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block contenido %}
+
+<div class="container mt-4">
+  <!-- Título principal -->
+  <div class="text-center mb-4">
+    <h2 class="text-primary fw-bold mb-1">Hola {{ current_user.nombre }}</h2>
+    <p class="text-muted">Resumen de tu progreso y alumnos registrados</p>
+  </div>
+
+  <!-- =========================================================
+       🧮 TARJETAS DE RESUMEN — RESPONSIVE ESPACIADAS
+  ========================================================== -->
+  <div class="row g-4">
+    <div class="col-12 col-md-4">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-semibold">Total de Alumnos</h5>
+          <p class="display-6 fw-bold text-dark mb-0 contador" data-target="{{ total_alumnos }}">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-semibold">Mediciones Totales</h5>
+          <p class="display-6 fw-bold text-dark mb-0 contador" data-target="{{ total_mediciones }}">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title fw-semibold">Última Medición</h5>
+          <p class="display-6 fw-bold text-dark mb-0">{{ ultima_medicion }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       📋 TABLA DE ALUMNOS RECIENTES — CON SCROLL RESPONSIVE
+  ========================================================== -->
+  <h4 class="mt-5 mb-3 text-primary fw-bold">
+    <i class="bi bi-clock-history"></i> Alumnos Recientes
+  </h4>
+
+  {% if alumnos_recientes %}
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive custom-scroll">
+        <table class="table table-striped table-hover align-middle text-center mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th>Nombre</th>
+              <th>Edad</th>
+              <th>Género</th>
+              <th>Última Medición</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in alumnos_recientes %}
+            <tr>
+              <td>{{ a.nombre }}</td>
+              <td>{{ a.edad }}</td>
+              <td>{{ a.genero }}</td>
+              <td>{{ a.ultima_medicion }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5 mensaje-vacio">
+    <i class="bi bi-people fs-1 mb-3 d-block"></i>
+    <h5 class="fw-bold">Aún no tienes alumnos cargados</h5>
+    <p class="mb-0">Aquí aparecerán tus alumnos una vez que los agregues.</p>
+  </div>
+{% endif %}
+</div>
+
+{% endblock %}

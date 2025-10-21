@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <h2 class="text-primary fw-bold mb-4 text-center">Registrar Nueva Medición</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+          {% if not alumno_fijo %}
+          <!-- Mostrar selector normalmente -->
+          <div class="col-md-6 mb-3">
+            {{ form.alumno.label(class="form-label") }}
+            {{ form.alumno(class="form-select", id="alumno") }}
+          </div>
+        {% else %}
+          <!-- Mostrar alumno fijo si venís desde datos_de_alumno.html -->
+          <input type="hidden" name="alumno" id="alumno" value="{{ alumno_fijo.id }}">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Alumno</label>
+            <input type="text" class="form-control bg-light text-muted" value="{{ alumno_fijo.nombre }}" readonly>
+          </div>
+        {% endif %}
+
+
+          <!-- Fecha -->
+          <div class="col-md-6 mb-3 position-relative">
+            {{ form.fecha.label(class="form-label") }}
+            {{ form.fecha(class="form-control", id="fecha") }}
+            <div id="fecha-alerta-spot"></div>
+          </div>
+
+          <!-- Campos físicos -->
+          <div class="col-md-4 mb-3">
+            {{ form.peso.label(class="form-label") }}
+            {{ form.peso(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.altura.label(class="form-label") }}
+            {{ form.altura(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.cintura.label(class="form-label") }}
+            {{ form.cintura(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.cadera.label(class="form-label") }}
+            {{ form.cadera(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.pecho.label(class="form-label") }}
+            {{ form.pecho(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.brazo.label(class="form-label") }}
+            {{ form.brazo(class="form-control") }}
+          </div>
+
+          <div class="col-md-4 mb-3">
+            {{ form.muslo.label(class="form-label") }}
+            {{ form.muslo(class="form-control") }}
+          </div>
+        </div>
+
+        <!-- Botón -->
+        <div class="text-center mt-4">
+          {{ form.submit(class="btn btn-primary px-4", id="btn-submit") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     ⚙️ SCRIPT — Verificación en vivo de mediciones duplicadas
+========================================================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const alumnoSelect = document.getElementById("alumno");
+  const fechaInput   = document.getElementById("fecha");
+  const btnSubmit    = document.getElementById("btn-submit");
+
+  // ⚠️ Crear alerta de duplicado (sin interferir con el input)
+  const alerta = document.createElement("div");
+  alerta.className = "alert alert-warning mt-2 text-center d-none";
+  alerta.innerHTML = "⚠️ Ya existe una medición para este alumno en esa fecha.";
+  document.getElementById("fecha-alerta-spot").appendChild(alerta);
+
+  let timeout;
+  function debounce(fn, delay = 250) {
+    clearTimeout(timeout);
+    timeout = setTimeout(fn, delay);
+  }
+
+  async function checkMedicion() {
+    const alumnoId = alumnoSelect.value;
+    const fecha = fechaInput.value;
+    if (!alumnoId || !fecha) {
+      alerta.classList.add("d-none");
+      fechaInput.classList.remove("is-invalid");
+      if (btnSubmit) btnSubmit.disabled = false;
+      return;
+    }
+
+    const url = "{{ url_for('cliente.check_medicion') }}" + `?alumno_id=${encodeURIComponent(alumnoId)}&fecha=${encodeURIComponent(fecha)}`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.exists) {
+        alerta.classList.remove("d-none");
+        fechaInput.classList.add("is-invalid");
+        if (btnSubmit) btnSubmit.disabled = true;
+      } else {
+        alerta.classList.add("d-none");
+        fechaInput.classList.remove("is-invalid");
+        if (btnSubmit) btnSubmit.disabled = false;
+      }
+    } catch (err) {
+      console.error(err);
+      alerta.classList.add("d-none");
+      fechaInput.classList.remove("is-invalid");
+      if (btnSubmit) btnSubmit.disabled = false;
+    }
+  }
+
+  alumnoSelect.addEventListener("change", () => debounce(checkMedicion));
+  fechaInput.addEventListener("input", () => debounce(checkMedicion));
+});
+</script>
+
+{% endblock %}

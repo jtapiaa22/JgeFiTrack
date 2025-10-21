@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <h2 class="text-center text-primary fw-bold mb-4">
+    <i class="bi bi-graph-up-arrow"></i> Resumen de Ingresos
+  </h2>
+
+  <!-- FILTRO DE MES Y AÑO -->
+  <form method="post" class="row g-3 justify-content-center mb-4">
+    <div class="col-md-3 col-6">
+      <select name="mes" class="form-select">
+        {% for numero, nombre in meses %}
+          <option value="{{ numero }}" {% if numero == mes %}selected{% endif %}>{{ nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3 col-6">
+      <select name="anio" class="form-select">
+        {% for y in range(hoy.year - 3, hoy.year + 1) %}
+          <option value="{{ y }}" {% if y == anio %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 text-center">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-funnel"></i> Filtrar
+      </button>
+    </div>
+  </form>
+
+  <!-- TARJETAS RESUMEN -->
+  <div class="row g-4 text-center mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-muted">Ingresos de {{ periodo }}</h5>
+          <h3 class="text-success fw-bold">${{ "%.2f"|format(total_mes) }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-muted">Total Histórico</h5>
+          <h3 class="text-dark fw-bold">${{ "%.2f"|format(total_general) }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRÁFICO -->
+  <div class="card shadow-sm border-0 mb-5">
+    <div class="card-body">
+      <h5 class="text-secondary mb-3"><i class="bi bi-bar-chart"></i> Ingresos por Cliente</h5>
+      <canvas id="graficoIngresos" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLA DETALLE -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle text-center shadow-sm">
+      <thead class="table-primary">
+        <tr>
+          <th>Cliente</th>
+          <th>Total Pagado (ARS)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for nombre, total in pagos_clientes %}
+        <tr>
+          <td>{{ nombre }}</td>
+          <td class="fw-semibold text-success">${{ "%.2f"|format(total) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="2" class="text-muted">No hay pagos registrados en este mes.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('graficoIngresos');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ pagos_clientes|map(attribute=0)|list|tojson }},
+      datasets: [{
+        label: 'Ingresos por Cliente (ARS)',
+        data: {{ pagos_clientes|map(attribute=1)|list|tojson }},
+        backgroundColor: 'rgba(31, 78, 121, 0.7)',
+        borderColor: '#f5b841',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#666' },
+          grid: { color: 'rgba(0,0,0,0.1)' }
+        },
+        x: {
+          ticks: { color: '#666' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

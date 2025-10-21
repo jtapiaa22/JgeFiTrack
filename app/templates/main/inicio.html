@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="text-center mt-5">
+  <h1 class="display-5 fw-bold text-primary">Bienvenido a GymApp</h1>
+  <p class="lead text-muted mt-3">Tu plataforma de control físico y evolución corporal.</p>
+  <p class="text-muted">Monitorea, analiza y mejora tus resultados día a día.</p>
+  <a href="{{ url_for('main.login') }}" class="btn btn-primary btn-lg mt-3">
+    <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+    <h2 class="text-primary fw-bold mb-2">
+      <i class="bi bi-people"></i> Mis Alumnos
+    </h2>
+    <div class="mt-2 mt-md-0">
+      <a href="{{ url_for('cliente.nuevo_alumno') }}" class="btn btn-success me-2">
+        <i class="bi bi-person-plus"></i> Nuevo Alumno
+      </a>
+      <a href="{{ url_for('cliente.medicion') }}" class="btn btn-success">
+        <i class="bi bi-people"></i> Agregar Medición
+      </a>
+    </div>
+  </div>
+
+  {% if alumnos %}
+  <!-- =========================================================
+       📋 TABLA DE ALUMNOS — RESPONSIVE SCROLLABLE
+  ========================================================== -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive custom-scroll">
+        <table class="table table-striped table-hover align-middle text-center mb-0">
+          <thead class="table-primary">
+            <tr>
+              <th>Nombre</th>
+              <th>Edad</th>
+              <th>Género</th>
+              <th>Fecha de Creación</th>
+              <th>Mediciones</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            {% for alumno in alumnos %}
+            <tr>
+              <td>{{ alumno.nombre }}</td>
+              <td>{{ alumno.edad }}</td>
+              <td>{{ alumno.genero }}</td>
+              <td>{{ alumno.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+              <td>{{ alumno.mediciones|length }}</td>
+              <td>
+                <div class="d-flex justify-content-center flex-wrap gap-1">
+                  <a href="{{ url_for('cliente.mediciones_alumno', id=alumno.id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-clipboard-data"></i> Ver
+                  </a>
+                  <a href="{{ url_for('cliente.editar_alumno', id=alumno.id) }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
+                  <a href="{{ url_for('cliente.eliminar_alumno', id=alumno.id) }}" 
+                     class="btn btn-sm btn-danger"
+                     onclick="return confirm('¿Seguro que deseas eliminar este alumno?');">
+                    <i class="bi bi-trash"></i> Eliminar
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center shadow-sm mt-4">
+    <i class="bi bi-info-circle"></i> No tienes alumnos registrados aún.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

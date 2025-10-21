@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block contenido %}
+<div class="container mt-4">
+  <h2 class="text-primary fw-bold mb-4 text-center">Editar Medición</h2>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+          <div class="col-md-6 mb-3">{{ form.fecha.label(class="form-label") }} {{ form.fecha(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.peso.label(class="form-label") }} {{ form.peso(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.altura.label(class="form-label") }} {{ form.altura(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.cintura.label(class="form-label") }} {{ form.cintura(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.cadera.label(class="form-label") }} {{ form.cadera(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.pecho.label(class="form-label") }} {{ form.pecho(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.brazo.label(class="form-label") }} {{ form.brazo(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">{{ form.muslo.label(class="form-label") }} {{ form.muslo(class="form-control") }}</div>
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-success px-4"><i class="bi bi-check-circle"></i> Guardar Cambios</button>
+          <a href="{{ url_for('cliente.mediciones_alumno', id=alumno.id) }}" class="btn btn-secondary px-4 ms-2">
+            <i class="bi bi-arrow-left"></i> Volver
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
