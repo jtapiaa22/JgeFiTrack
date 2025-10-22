@@ -1,0 +1,10 @@
+#loader {
+    background: rgba(255,255,255,0.8);
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}

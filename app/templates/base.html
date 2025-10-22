@@ -13,6 +13,7 @@
 
   <!-- CSS personalizado -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
 
   <!-- JS personalizado -->
   <script src="{{ url_for('static', filename='js/flash_messages.js') }}"></script>
@@ -28,15 +29,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Imagen  -->
-  
-
-
-
 </head>
 
-<!-- ✅ El body ya se adapta al tema -->
+<!-- El body ya se adapta al tema -->
 <body class="{% if session.get('theme') == 'dark' %}dark-mode{% endif %}">
+   <!-- Loader  -->
+  <div id="loader" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:white;z-index:9999;justify-content:center;align-items:center;">
+      <img src="{{ url_for('static', filename='loader/loader.gif') }}" alt="Cargando..." />
+  </div>
   
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg shadow-sm">
@@ -126,8 +126,20 @@
     navigator.serviceWorker.register('/static/js/service-worker.js')
       .then(reg => console.log('✅ Service Worker activo:', reg.scope))
       .catch(err => console.error('❌ Error al registrar el SW:', err));
-}
-</script>
+    }
+  </script>
+
+  <script>
+    // Mostrar loader antes de abandonar la página
+    window.addEventListener("beforeunload", function () {
+        document.getElementById("loader").style.display = "flex";
+    });
+
+    // Ocultar loader al terminar de cargar
+    window.addEventListener("load", function () {
+        document.getElementById("loader").style.display = "none";
+    });
+  </script>
 
 
 </body>
