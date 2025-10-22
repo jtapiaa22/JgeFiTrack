@@ -11,13 +11,13 @@
   <!-- Iconos -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- CSS personalizado -->
+  <!-- CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
-
-  <!-- JS personalizado -->
+ 
+  <!-- JS -->
   <script src="{{ url_for('static', filename='js/flash_messages.js') }}"></script>
   <script src="{{ url_for('static', filename='js/theme_toggle.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 
   <script src="{{ url_for('static', filename='js/contadores.js') }}" defer></script>
 
@@ -128,19 +128,5 @@
       .catch(err => console.error('❌ Error al registrar el SW:', err));
     }
   </script>
-
-  <script>
-    // Mostrar loader antes de abandonar la página
-    window.addEventListener("beforeunload", function () {
-        document.getElementById("loader").style.display = "flex";
-    });
-
-    // Ocultar loader al terminar de cargar
-    window.addEventListener("load", function () {
-        document.getElementById("loader").style.display = "none";
-    });
-  </script>
-
-
 </body>
 </html>

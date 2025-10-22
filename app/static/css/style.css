@@ -608,3 +608,25 @@ body.dark-mode .form-control.is-invalid {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+
+/* LOADER */
+#loader {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,0.8);
+}
+
+body.dark-mode #loader {
+    background: rgba(30,32,33,0.95); /* Fondo oscuro */
+}
+
+body:not(.dark-mode) #loader {
+    background: rgba(255,255,255,0.8); /* Fondo claro */
+}
+
+
