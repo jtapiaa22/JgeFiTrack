@@ -9,14 +9,55 @@
         {{ form.hidden_tag() }}
 
         <div class="row">
-          <div class="col-md-6 mb-3">{{ form.fecha.label(class="form-label") }} {{ form.fecha(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.peso.label(class="form-label") }} {{ form.peso(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.altura.label(class="form-label") }} {{ form.altura(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.cintura.label(class="form-label") }} {{ form.cintura(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.cadera.label(class="form-label") }} {{ form.cadera(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.pecho.label(class="form-label") }} {{ form.pecho(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.brazo.label(class="form-label") }} {{ form.brazo(class="form-control") }}</div>
-          <div class="col-md-6 mb-3">{{ form.muslo.label(class="form-label") }} {{ form.muslo(class="form-control") }}</div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Alumno</label>
+            <input type="text" class="form-control bg-light text-muted" value="{{ alumno.nombre }}" readonly>
+          </div>
+          <div class="col-md-6 mb-3">
+            {{ form.fecha.label(class="form-label") }}
+            {{ form.fecha(class="form-control") }}
+          </div>
+        </div>
+
+        <!-- Switch de modo -->
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label class="form-label mb-2">Modo de carga</label>
+            <div class="d-flex gap-3 align-items-center">
+              {% for subfield in form.modo %}
+                <div class="form-check">
+                  {{ subfield(class="form-check-input") }}
+                  <label class="form-check-label" for="{{ subfield.id }}">
+                    {{ subfield.label.text }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Medidas corporales básicas -->
+        <div class="row">
+          <div class="col-md-4 mb-3">{{ form.peso.label(class="form-label") }}{{ form.peso(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.altura.label(class="form-label") }}{{ form.altura(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.cadera.label(class="form-label") }}{{ form.cadera(class="form-control") }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">{{ form.cintura.label(class="form-label") }}{{ form.cintura(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.pecho.label(class="form-label") }}{{ form.pecho(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.brazo.label(class="form-label") }}{{ form.brazo(class="form-control") }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">{{ form.muslo.label(class="form-label") }}{{ form.muslo(class="form-control") }}</div>
+        </div>
+
+        <!-- Campos de balanza: SOLO visibles en ese modo -->
+        <div class="row" id="balanza-fields" style="display:none;">
+          <hr>
+          <div class="col-md-4 mb-3">{{ form.grasa_corporal.label(class="form-label") }}{{ form.grasa_corporal(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.musculo.label(class="form-label") }}{{ form.musculo(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.agua_corporal.label(class="form-label") }}{{ form.agua_corporal(class="form-control") }}</div>
+          <div class="col-md-4 mb-3">{{ form.metabolismo_basal.label(class="form-label") }}{{ form.metabolismo_basal(class="form-control") }}</div>
         </div>
 
         <div class="text-center mt-4">
@@ -26,6 +67,25 @@
           </a>
         </div>
       </form>
+
+      <!-- Mostrar/ocultar los campos de balanza según el modo -->
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          function toggleBalanzaFields() {
+            let modoRadio = document.querySelector('input[name="modo"]:checked');
+            let balanzaFields = document.getElementById("balanza-fields");
+            if (modoRadio && modoRadio.value === "balanza") {
+              balanzaFields.style.display = "";
+            } else {
+              balanzaFields.style.display = "none";
+            }
+          }
+          document.querySelectorAll('input[name="modo"]').forEach(el => {
+            el.addEventListener("change", toggleBalanzaFields);
+          });
+          toggleBalanzaFields();
+        });
+      </script>
     </div>
   </div>
 </div>

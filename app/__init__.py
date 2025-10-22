@@ -60,14 +60,14 @@ def create_app():
                     )
                     db.session.add(nuevo_admin)
                     db.session.commit()
-                    print(f"✅ Admin '{admin_user}' creado correctamente.")
+                    print(f">>Admin '{admin_user}' creado correctamente.")
                 else:
-                    print("⚠️ No se creó ningún admin (faltan variables de entorno).")
+                    print("No se creó ningún admin (faltan variables de entorno).")
             else:
-                print(f"ℹ️ Ya existe un administrador: {admin_existente.username}")
+                print(f">>Ya existe un administrador: {admin_existente.username}")
 
         except Exception as e:
-            print(f"⚠️ No se pudo crear el usuario admin: {e}")
+            print(f">>No se pudo crear el usuario admin: {e}")
 
     # =========================================================
     # Context processors
@@ -106,4 +106,19 @@ def create_app():
                 logout_user()
                 return redirect(url_for('main.login'))
 
+    
+    # =========================================================
+    # Ejecutar migraciones pendientes utilizando Flask-Migrate
+    # =========================================================
+    with app.app_context():
+        try:
+            from flask_migrate import upgrade
+            upgrade()
+            print("Migraciones Alembic (flask db upgrade) aplicadas automáticamente.")
+        except Exception as e:
+            print(f"Error al aplicar migraciones: {e}")
+
+
+
+    
     return app

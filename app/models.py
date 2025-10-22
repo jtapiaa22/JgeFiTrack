@@ -83,13 +83,11 @@ class MedicionCorporal(db.Model):
     )
 
     # =============================
-    # FUNCIONES DE CÁLCULO MEJORADAS
+    # FUNCIONES DE CALCULO
     # =============================
     def genero_y_edad(self):
-        # Consigue genero y edad preferentemente del objeto alumno relacionado
         genero = getattr(self.alumno, "genero", None)
         edad = getattr(self.alumno, "edad", None)
-        # Si falta o está vacío, usar por defecto
         if not genero:
             genero = "masculino"
         if not edad:
@@ -98,10 +96,7 @@ class MedicionCorporal(db.Model):
 
     def calcular_imc(self):
         if self.peso and self.altura and self.altura > 0:
-            try:
-                self.imc = round(self.peso / ((self.altura / 100) ** 2), 2)
-            except Exception:
-                self.imc = None
+            self.imc = round(self.peso / ((self.altura / 100) ** 2), 2)
         else:
             self.imc = None
         return self.imc
@@ -120,24 +115,19 @@ class MedicionCorporal(db.Model):
     def calcular_grasa_corporal(self):
         genero, edad = self.genero_y_edad()
         altura = self.altura
-        # Convertir alturas anómalas (ejemplo ingresada en metros)
         if altura and altura < 10:
             altura = altura * 100
         if not (self.cintura and self.cadera and altura):
             self.grasa_corporal = None
             return self.grasa_corporal
-
         try:
             if genero == "masculino":
                 bf = (86.010 * math.log10(self.cintura - self.cintura * 0.25)) \
-                   - (70.041 * math.log10(altura)) + 36.76
+                    - (70.041 * math.log10(altura)) + 36.76
             else:
                 bf = (163.205 * math.log10(self.cintura + self.cadera - self.cintura * 0.2)) \
-                   - (97.684 * math.log10(altura)) - 78.387
-
+                    - (97.684 * math.log10(altura)) - 78.387
             self.grasa_corporal = round(max(2, min(bf, 60)), 2)
-
-            # Masa grasa absoluta en kg:
             if self.peso:
                 self.masa_grasa = round(self.peso * (self.grasa_corporal / 100), 2)
             else:
@@ -159,6 +149,20 @@ class MedicionCorporal(db.Model):
             self.agua_corporal = None
         return self.agua_corporal
 
+
+    def calcular_musculo(self):
+        genero, _ = self.genero_y_edad()
+        if self.grasa_corporal is not None:
+            masa_magra = 100 - self.grasa_corporal
+            if genero == "femenino":
+                self.musculo = round(masa_magra * 0.50, 2)
+            else:
+                self.musculo = round(masa_magra * 0.55, 2)
+            self.musculo = max(0, min(self.musculo, 100))
+        else:
+            self.musculo = None
+        return self.musculo
+
     def calcular_rcc(self):
         if self.cintura and self.cadera and self.cadera > 0:
             try:
@@ -178,19 +182,6 @@ class MedicionCorporal(db.Model):
         else:
             self.rca = None
         return self.rca
-
-    def calcular_musculo(self):
-        genero, _ = self.genero_y_edad()
-        if self.grasa_corporal is not None:
-            masa_magra = 100 - self.grasa_corporal
-            if genero == "femenino":
-                self.musculo = round(masa_magra * 0.50, 2)
-            else:
-                self.musculo = round(masa_magra * 0.55, 2)
-            self.musculo = max(0, min(self.musculo, 100))
-        else:
-            self.musculo = None
-        return self.musculo
 
     def calcular_relaciones(self):
         self.calcular_rcc()

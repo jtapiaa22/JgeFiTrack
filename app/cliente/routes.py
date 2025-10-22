@@ -10,7 +10,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 import io
-from datetime import datetime
+from datetime import datetime, date
 from reportlab.platypus import Image
 import base64
 from config import BASE_DIR
@@ -65,31 +65,28 @@ from datetime import date
 def medicion():
     form = MedicionForm()
 
-    # 🟢 Capturamos el alumno_id de la URL si existe (cuando venís desde datos_de_alumno.html)
+    #capturar alumno para que no tengas que elegir de nuevo
     alumno_id = request.args.get('alumno_id', type=int)
 
-    # 📋 Listado normal de alumnos del cliente
+    #listar alumnos
     form.alumno.choices = [
         (a.id, a.nombre)
         for a in Alumno.query.filter_by(cliente_id=current_user.id).all()
     ]
 
     alumno_fijo = None
-    if alumno_id:  # Si venís desde un alumno específico
+    if alumno_id:
         alumno_fijo = Alumno.query.get_or_404(alumno_id)
-        form.alumno.data = alumno_fijo.id  # lo preseleccionamos
-
-    # ✅ Si se envió el formulario
+        form.alumno.data = alumno_fijo.id
+   
     if form.validate_on_submit():
         alumno = Alumno.query.get_or_404(form.alumno.data)
+        f = form.fecha.data
 
-        f = form.fecha.data  # DateField ya devuelve date()
-
-        # ❌ Bloquear duplicado
+        #bloquear duplicado
         ya_existe = MedicionCorporal.query.filter_by(alumno_id=alumno.id, fecha=f).first()
         if ya_existe:
             flash(f'⚠️ Ya existe una medición para {alumno.nombre} el {f.strftime("%d/%m/%Y")}.', 'warning')
-            # 👇 Si tenías un alumno fijo, redirige con su ID para mantener el modo sin select
             if alumno_fijo:
                 return redirect(url_for('cliente.medicion', alumno_id=alumno.id))
             return redirect(url_for('cliente.medicion'))
@@ -97,13 +94,17 @@ def medicion():
         # 🆕 Crear nueva medición
         nueva = MedicionCorporal(
             fecha=f,
-            peso=form.peso.data,
-            altura=form.altura.data,
-            cintura=form.cintura.data,
-            cadera=form.cadera.data,
-            pecho=form.pecho.data,
-            muslo=form.muslo.data,
-            brazo=form.brazo.data,
+            peso=form.peso.data if form.peso.data else None,
+            altura=form.altura.data if form.altura.data else None,
+            cintura=form.cintura.data if form.cintura.data else None,
+            cadera=form.cadera.data if form.cadera.data else None,
+            pecho=form.pecho.data if form.peso.data else None,
+            muslo=form.muslo.data if form.muslo.data else None,
+            brazo=form.brazo.data if form.brazo.data else None,
+            grasa_corporal=form.grasa_corporal.data if form.grasa_corporal.data else None,
+            musculo=form.musculo.data if form.musculo.data else None,
+            agua_corporal=form.agua_corporal.data if form.agua_corporal.data else None,
+            metabolismo_basal=form.metabolismo_basal.data if form.metabolismo_basal.data else None,
             alumno_id=alumno.id
         )
 
@@ -114,14 +115,12 @@ def medicion():
         flash('✅ Medición guardada correctamente y datos recalculados.', 'success')
         return redirect(url_for('cliente.mediciones_alumno', id=alumno.id))
 
-    # 🔁 Pasamos alumno_fijo para que el template sepa si debe ocultar el select
     return render_template('cliente/medicion.html', form=form, alumno_fijo=alumno_fijo)
 
 # -------------------------------------------------------------------
 # AJAX: chequear si existe medición para (alumno, fecha)
 # -------------------------------------------------------------------
-from flask import request, jsonify
-from datetime import date
+
 
 @cliente.route('/check-medicion', methods=['GET'])
 @login_required
@@ -415,7 +414,19 @@ def editar_medicion(id_alumno, id_medicion):
         flash("No tenés permiso para editar esta medición.", "danger")
         return redirect(url_for('cliente.mediciones_alumno', id=id_alumno))
 
-    form = EditarMedicionForm(obj=medicion)
+    form = MedicionForm(obj=medicion)
+    form.alumno.choices = [(alumno.id, alumno.nombre)]
+    form.alumno.data = alumno.id
+
+    if request.method == "GET":
+        any_balanza = any([
+            medicion.grasa_corporal,
+            medicion.musculo,
+            medicion.agua_corporal,
+            medicion.metabolismo_basal
+                           ])
+        form.modo.data = "balanza" if any_balanza else "manual"
+
 
     if form.validate_on_submit():
         medicion.fecha = form.fecha.data
@@ -423,12 +434,18 @@ def editar_medicion(id_alumno, id_medicion):
         medicion.altura = form.altura.data
         medicion.cintura = form.cintura.data
         medicion.cadera = form.cadera.data
-        medicion.pecho = form.pecho.data
         medicion.brazo = form.brazo.data
+        medicion.pecho = form.pecho.data
         medicion.muslo = form.muslo.data
 
-        medicion.calcular_todo()
+        #datos de modo balanza:
+        medicion.grasa_corporal = form.grasa_corporal.data if form.grasa_corporal.data else None
+        medicion.musculo = form.musculo.data if form.musculo.data else None
+        medicion.agua_corporal = form.agua_corporal.data if form.agua_corporal.data else None
+        medicion.metabolismo_basal = form.metabolismo_basal.data if form.metabolismo_basal.data else None
 
+        #reiniciar/ajustar los valores calculados
+        medicion.calcular_todo()
         db.session.commit()
         flash("Medición actualizada correctamente.", "success")
         return redirect(url_for('cliente.mediciones_alumno', id=id_alumno))
