@@ -107,7 +107,7 @@ def medicion():
             alumno_id=alumno.id
         )
 
-        nueva.calcular_todo(genero=alumno.genero, edad=alumno.edad)
+        nueva.calcular_todo()
         db.session.add(nueva)
         db.session.commit()
 
@@ -427,7 +427,7 @@ def editar_medicion(id_alumno, id_medicion):
         medicion.brazo = form.brazo.data
         medicion.muslo = form.muslo.data
 
-        medicion.calcular_todo(genero=alumno.genero, edad=alumno.edad)
+        medicion.calcular_todo()
 
         db.session.commit()
         flash("Medición actualizada correctamente.", "success")

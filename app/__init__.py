@@ -102,7 +102,7 @@ def create_app():
             mes_actual = datetime.now().strftime("%B %Y")
 
             if not pago or pago.mes_correspondiente != mes_actual:
-                flash("🚫 Tu cuenta está suspendida por falta de pago del mes actual. Contactá con el administrador.", "danger")
+                flash("Tu cuenta no esta activada, contactate con el creador para solucionarlo", "danger")
                 logout_user()
                 return redirect(url_for('main.login'))
 
