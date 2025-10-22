@@ -7,6 +7,9 @@ from config import Config
 from app.extensions import db, login_manager, migrate
 from app.models import PagoCliente, User
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
