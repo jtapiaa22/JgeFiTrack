@@ -1,0 +1,19 @@
+# Entorno virtual
+venv/
+.env
+
+# Archivos temporales
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Base de datos local
+*.db
+
+# Configuraciones del sistema
+desktop.ini
+.DS_Store
+
+# Archivos de caché
+instance/
